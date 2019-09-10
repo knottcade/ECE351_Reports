@@ -1,0 +1,26 @@
+This part of the lab included Python methods for using variables, arrays, and matrices. First we learned that Python does not have different variable classes like other common languages, and that you can actually check a variable's contents using the print function. We also learned how to round our numbers, as well as square numbers in Python. As opposed to LaTeX that uses the \% symbol to indicate comments, Python uses the \# symbol. Next we learned how to use some of the functions available through Python, focusing on how to use lists and arrays. Lists in Python are just variables with multiple values, but we learned how to use numpy arrays as they will be more useful in this lab. The following code shows how these different lists and arrays are defined and characterized.
+\begin{lstlisting}
+In [5]: list1 = [0,1,2,3]
+        print('list1:',list1)
+        list2 = [[0],[1],[2],[2]]
+        print('list2:',list2)
+        list3 = [[0,1],[2,3]]
+        print('list3:',list3)
+        array1 = numpy.array([0,1,2,3])
+        print('array1:',array1)
+        array2 = numpy.array([[0],[1],[2],[3]])
+        print('array2:',array2)
+        array3 = numpy.array([[0,1],[2,3]])
+        print('array3:',array3)
+list1: [0, 1, 2, 3]
+list2: [[0], [1], [2]. [3]]
+list3: [[0, 1], [2, 3]]
+array1: [0 1 2 3]
+array2: [[0]
+  [1]
+  [2]
+  [3]]
+array3: [[0 1]
+  [2 3]]
+\end{lstlisting}
+After becoming more familiar with arrays, we also learned a shortcut to avoid typing out 'numpy' everytime, by simply importing it as something shorter. We also were taught how to create larger arrays by using arranges in numpy. These arranges also allow for the user to set boundaries, so that we can only look at the range of values that is important to us. After covering large arrays we moved on to indexing lists and arrays. Lastly for this section we learned how to define matrices as an array of zeroes or ones, using numpy's built in functions.
