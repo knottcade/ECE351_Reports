@@ -1,0 +1,296 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Modified (v 0.2) by jluo
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2019
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{\thepage}
+\fancyhead[R]{Knott}
+%\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+{\fontfamily{cmr}\selectfont
+\title{ \LARGE\textsc{ECE 351 Sect. 51 \\ Lab 2}
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{1}
+		\HRule{0.5pt} \\ [0.5cm]
+		\normalsize \today \vspace*{5\baselineskip}}
+		}
+
+\date{}
+
+\author{
+		Cade Knott\\}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%-------------------------------------------------------------------------------
+% Section title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{Introduction}
+The purpose of this lab was to practice using and defining functions in Python, as well as learning to plot the results of these functions. Python also allows for manipulation of graphs and functions using time shifts and reversals, which can be very useful in representing signals. Having the knowledge to apply these methods will be super useful as our signals become more complex.
+%\newpage
+
+\section{Equations}
+Equation for Graph Model
+$$y = r(t) - r(t-3) + 5u(t-3) - 2u(t-6) - 2r(t-6)$$
+
+\section{Methodology}
+
+\textbf{Part 1}
+
+This section of the lab required us to create our own user defined function to plot a cosine function. In order to complete this, I looked at the example function that was given in the lab handout. From this basic structure I was able to develop a code that returned a cosine function, that looked like this: 
+\begin{lstlisting}
+def func1(t, start):
+    y = np.zeros((len(t),1))
+    for i in range(len(t)):
+        if t[i] > start:
+            y[i] = np.cos(t[i])
+        else:
+            y[i] = 0
+    return y
+\end{lstlisting}
+After completing this function, I again followed the example to call, plot, and print my function.
+\newline
+
+\noindent\textbf{Part 2}
+
+The next section of the lab required us to recognize a graph, and model the graph with a user defined function. To complete this I created two functions; a ramp function and a step function to model the two different types of slope on the graph. The following is my code for the step function:
+\begin{lstlisting}
+def step(t, m, start):
+    y = np.zeros((len(t),1))
+    for i in range(len(t)):
+          if t[i] > start:
+              y[i] = (m)
+          else:
+              y[i] = 0
+    return y
+\end{lstlisting}
+And my code for the ramp function:
+\begin{lstlisting}
+def ramp(t, m, start):
+    y = np.zeros((len(t),1))
+    for i in range(len(t)):
+          if t[i] > start:
+              y[i] = (m*t[i])-(m*start)
+          else:
+              y[i] = 0
+    return y
+\end{lstlisting}
+These functions consist of a for loop to assign the array values, and an if statement to keep the arrays in the correct range. They also require three argument inputs, an x axis variable, a magnitude, and a start place. This allows for the functions to be place anywhere needed on a graph, and have any magnitude/slope. The next function I defined was the function that modeled the graph in the lab handout. The code for the function looks like this:
+\begin{lstlisting}
+def chimney(t):
+    y = ramp(t, 1, 0) - ramp(t, 1, 3) + step(t, 5, 3) - step(t, 2, 6) - ramp(t, 2, 6)
+    return y
+\end{lstlisting}
+This function is simply a code representation of the equation that I derived to model the graph in question, with multiple calls to my ramp and step functions.\newline
+
+\noindent\textbf{Part 3}
+
+This final part of the lab required us to manipulate our graph from part 2 in a few different ways. The first way was to apply a time reversal to the graph, which I did by changing the argument I passed into my "chimney" function, from a regular "t" to a negative "-t", like this: \texttt{y = chimney(-t)}. This causes the graph to be reversed with respect to time, which is why my graph flips around across the y-axis. Next was applying time shift operations, which I completed in a similar fashion by again simply changing the argument going into the function accordingly, so \texttt{(t-4), (-t-4), (t/2), (t*2)}. My next task was to plot the derivative of my "chimney" function with respect to time. Before completing this task using code, I completed a hand drawn graph of what I expected the derivative to appear like. Here is my hand drawn graph:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = 15cm]{handderiv.png}
+\end{figure}
+\noindent After completing this graph, I then wrote code to plot the actual derivative of my function in Python. I used Numpy.diff to complete this and the code looked like this: 
+\begin{lstlisting}
+dt = np.diff(t)
+dy = np.diff(y, axis = 0)
+\end{lstlisting}
+I then had to reference these two new variables I had defined in my plot section by changing my plot arguments, like this: \texttt{plt.plot(t[0:len(t)-1],dy/dt)}. This concluded the tasks assigned in the lab handout.
+
+\newpage
+\section{Results} 
+\textbf{Part 1}
+
+The following is the graph that was plotted by my first simple user defined function:
+
+%\begin{figure}[H]
+    %\centering
+    \includegraphics[width=15cm]{Part1Task2Plot.png}
+%\end{figure}
+
+\noindent My function was written to represent a cosine function, which is exactly what my graph reflects. \newline
+
+\noindent \textbf{Part 2}
+
+This next part included creating functions to represent ramp and step functions, as well a function to model the given graph. Here is the plot for my ramp function:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{ramp.png}
+\end{figure}
+
+\noindent And the plot for the step function:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{step.png}
+\end{figure}
+
+\noindent As you can see, the ramp and step functions accurately display the functions we have been discussing in class, $r(t)$ and $u(t)$. Using these two functions, I then translated the equation from task one into a separate function that models the given graph. The plot for this function is here:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{Part2.png}
+\end{figure}
+
+\noident As shown, the plot perfectly replicates the graph given in the lab handout.
+
+\noindent \textbf{Part 3}
+
+The final part of the lab required making minor modifications to the last plot, using time reversals and shifts. The first plot was a time reversal, which is achieved by inputting a "(-t)" when calling the function. Here is the plot for this time reversal:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{timereversal.png}
+\end{figure}
+
+\noindent Next, we applied two different time shifts, $(t-4)$ and $(-t-4)$. The plots are shown below:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{tminus4.png}
+\end{figure}
+
+\noindent As you can see, the graph is shifted over four seconds, so the graph does not begin changing until $t = 4$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{negtminus4.png}
+\end{figure}
+
+\noindent And for this one, the graph is again reversed, and stops changing at $t = -4$. Next we had to apply time scale operations, using $(2*t)$ and $(t/2)$. The plots are shown below:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{2t.png}
+\end{figure}
+
+\noindent As the plot shows, the function is compressed into half the space it took before, since the function is doubled with respect to time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{tover2.png}
+\end{figure}
+
+\noindent And for this plot, the function is stretched over twice the original distance as expected. Finally, we computed and plotted the derivative of the "chimney" function with respect to time. Here is the plot:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{deriv.png}
+\end{figure}
+
+\noindent This plot is very similar to my hand drawn derivative plot, with slight differences. Since a step function has an infinite slope, I indicated that the function was undefined at these points in my hand drawn plot. However, you can see that Python tries to represent these points with spikes in the graph. I also limited my axis parameters to limit how far these spikes could travel, and to keep my plot in a reasonable scale. This was the final step in completing the lab tasks.
+
+\section{Error Analysis}
+The main challenges I had through this lab were trying to develop my step and ramp functions, and formatting my plots. For the step and ramp functions, I looked at the mathematical definitions of the functions. For a step function, y is simply equal to the value/magnitude of the step function, added on top of the value y already has. So, I set up a for loop and set y[i] equal to the magnitude of the step. For a ramp, y is equal to the corresponding time, or a fraction of it based on the ramp. However, I had to subtract the starting value from the time value, so that I would be able to start the ramp function anywhere. As for formatting the plots, I had to do a bit of searching to find my answers. I found that I could edit the plot axes using the \texttt{plt.axis} command. This way I could properly set my bounds to allow for the full view of each graph to be seen. 
+
+\newpage
+\section{Questions}
+\begin{enumerate}
+    \item Are the plots from Part 3 Tasks 4 and 5 identical? Is it possible for them to match? Explain why or why not.
+    
+    The plots for Tasks 4 and 5 are not perfectly identical. In my hand drawn plot I represented the slope of the step function as an undefined point on the graph, while Numpy tried to evaluate the slope. It would be very difficult to exactly replicate the plot that the program made, but it could be possible for them to match. Alternatively, I could have changed my plot to not include the points where the derivative is undefined, and then the plots would likely be identical.
+    \newline
+    
+    \item How does the correlation between the two plots (from Part 3 Tasks 4 and 5) change if you were to change the step size within the time variable in Task 5? Explain why this happens.
+    
+    By changing the step size, the plot can get closer to the hand drawn plot. By increasing the step size, there are fewer points on the graph, so the step function points are much smaller peaks. However, if you decrease the step size there are more points and the plot will look less like the hand drawn plot. 
+    \newline
+    
+    \item In what way can the expectations and tasks be more clearly explained for this lab?
+    
+    I think the way the lab handout is structured is super helpful. It is very beneficial to have the deliverable defined for each section, and the tasks defined separately. The structure of the lab is very helpful for me when completing the lab, as well as when writing the lab report.
+\end{enumerate}
+
+\section{Conclusion}
+
+This lab was very helpful in getting more comfortable with Python and the different tools available through Anaconda. I feel much more knowledgeable about the program now, which will surely prepare me for more complex functions and plots. As I learn more about Anaconda I am able to use it more effectively, along with the time I spend on it. I look forward to picking up more techniques and applying them.
+https://github.com/knottcade
+
+
+%-------------------------------------------------------------------------------
+%REFERENCES
+%-------------------------------------------------------------------------------
+\newpage 
+\section{References}
+
+\textit{Inserting Images. (n.d.). Retrieved from https://www.overleaf.com/learn/latex/Inserting_Images}
+\end{document}
