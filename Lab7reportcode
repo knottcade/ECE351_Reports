@@ -1,0 +1,260 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Modified (v 0.2) by jluo
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2019
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{\thepage}
+\fancyhead[R]{Knott}
+%\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+{\fontfamily{cmr}\selectfont
+\title{ \LARGE\textsc{ECE 351 Sect. 51 \\ Lab 7}
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{7}
+		\HRule{0.5pt} \\ [0.5cm]
+		\normalsize \today \vspace*{5\baselineskip}}
+		}
+
+\date{}
+
+\author{
+		Cade Knott\\}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%-------------------------------------------------------------------------------
+% Section title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{Introduction}
+The goal for this lab was to practice more with using Laplace domain block diagrams, as well as learning how to judge the stability of a system based on the factored form of transfer function. Being able to approximate stability by simply glancing at a transfer function is a very useful tool to have, as you can already get an idea of what something should look like before you tackle it. In this lab, we were able to get an idea of what our functions should look like by using the scipy function to find poles and zeroes for our transfer function, before we actually plotted the function to verify our guess. Using this function to find zeroes and poles, we can evaluate very difficult functions and get an idea of how stable the system is with an easy Python operation. This will be very useful as transfer functions become more complex.
+
+\section{Equations}
+
+\textbf{Part 1}
+
+$$G(s) = \frac{s+9}{(s^2-6s-16)(s+4)} = \frac{s+9}{(s-8)(s+2)(s+4)}$$
+$$zeroes = -9$$
+$$poles = 8, -4, -2$$
+
+$$A(s) = \frac{s+4}{s^2+4s+3} = \frac{s+4}{(s+3)(s+1)}$$
+$$zeroes = -4$$
+$$poles = -3, -1$$
+
+$$B(s) = s^2+26s+168 = (s+12)(s+14)$$
+$$zeroes = -12, -14$$
+
+As can be seen, for these first three equations we are simply factoring the original functions into this form just as we have always factored polynomials, so that we can easily identify the zeroes and poles for each function by looking at what would set the numerator or denominator equal to zero. To verify this, I then used the scipy function \texttt{sig.tf2zpk()}. The output can be seen here:
+\begin{lstlisting}
+zG[-9.]
+pG[ 8. -4. -2.]
+kG1.0
+zA[-4.]
+pA[-3. -1.]
+kA1.0
+zB[-14. -12.]
+\end{lstlisting}
+As can be seen, these are the exact values I derived from factoring the equations, so my calculations were correct.
+
+$$Open loop = G*A = \frac{s+9}{(s-8)(s+2)(s+4)}*\frac{s+4}{(s+3)(s+1)} = \frac{s+9}{(s-8)(s+1)(s+2)(s+3)}$$
+
+Looking at this open loop transfer function, we can tell that it will not be stable because of the $(s-8)$ in the denominator. This means that our function has a positive pole, and therefore the system will not be stable. See results section for the step response plot of this function.
+
+\newline
+\textbf{Part 2}
+
+$$closedloop = H(s) = \frac{G(s)A(s)}{1+G(S)B(s)}$$
+$$ = \frac{\frac{numGnumA}{denGdenA}}{\frac{denG+numGnumB}{denG}} = \frac{numGnumA}{denA(denG+numGnumB)}$$
+
+First I had to solve the block diagram to find the actualy closed loop transfer function. Once I had solved for that, I simply had to substitute in my num/den representations of A, G, and B to obtain my transfer function symbolically. With this solved and simplified, I was able to actually use it in Python. After using the scipy convolve function, I found that my numerator and denominator coefficients looked like this:
+\newline Numerator =  [ 1 13 36]
+\newline Denominator =  [   2   41  500 2995 6878 4344]
+\newline This would make my overall closed loop transfer function look something like this:
+$$H(s) = \frac{s^2+13s+36}{2s^5+41s^4+500s^3+2995s^2+6878s+4344}$$
+
+By looking at this transfer function, our system should be stable since there are no negative terms in the denominator. See the results section for the step response plot of this function.
+
+\section{Methodology}
+
+\textbf{Part 1}
+
+To begin this lab, I started by analyzing the given functions by hand. I first factored them out so that I could easily identify the zeroes and poles. Once I had this done, I verified my results by using the scipy function \texttt{sig.tf2zpk()} and numpy.roots for function B. The printed output for these functions can be found in the equations section, and the code for using the functions can be seen here:
+\begin{lstlisting}
+Gnum = [1, 9]
+Gden = [1, -2, -40, -64]
+
+Anum = [1, 4]
+Aden = [1, 4, 3]
+
+B = [1, 26, 168]
+
+zG, pG, kG = sig.tf2zpk(Gnum, Gden)
+
+zA, pA, kA = sig.tf2zpk(Anum, Aden)
+
+zB = np.roots(B)
+\end{lstlisting}
+
+As you can see, I had to first create arrays to represent my different functions, both for the numerator and denominator since that is what the functions take in as arguments. Once my arrays were defined based on the s coefficients for each function, I then set my z, p, and k values equal to the scipy function with their numerators and denominators as arguments. However, since B does not have a denominator, I had to use the np.roots function. Once I verified all of my zeroes and poles, I moved on to finding my open loop transfer function. Once I had obtained that, I then analyzed to determine whether or not it would be stable, and I plotted the step response to verify my guess. I first had to expand the denominator of the function however, so that I had an array that the scipy step response function would be able to handle. To expand my denominator, I used the scipy convolve function that we have used in the past, but I had to pass in two convolve functions as agruments since the convolve function can only convolve two things. This means I had to convolve two halves of the denominator, and then convolve my two results. The code for this can be seen here:
+
+\begin{lstlisting}
+openden = sig.convolve(sig.convolve([1, -8], [1, 2]),sig.convolve([1, 3], [1, 1]))
+print ('Denominator = ', openden)
+
+tout, yout = sig.step((Gnum, openden))
+\end{lstlisting}
+
+With this complete, I moved on to part two.
+
+\noindent\textbf{Part 2}
+
+Part two was similar to part one, but this time we were instead using the closed loop transfer function as opposed to the open loop. The first thing I had to was solve for the closed loop transfer function symbolically, which can be seen in the equations section. Once the transfer function was defined symbolically, I was able to use it to expand my transfer function into two use-able arrays, one for the numerator and one for the denominator. The code for this can be seen here:
+
+\begin{lstlisting}
+closednum = sig.convolve(Anum, Gnum)
+closedden = sig.convolve((sig.convolve(Gnum, B)+Gden),Aden) 
+\end{lstlisting}
+
+Since my numerators and denominators were already defined for A, G, and B all I had to do was use the convolve function to fine my closed loop transfer function numerator and denominator. By passing in the symbols I had found in my derivation, I then obtained my new numerator and denominator for the overall closed loop transfer function. Once I had my new arrays, I was able to get a judgement for whether or not the system would be stable, which can be seen in the equations section. Then I plotted the step response for this transfer function, so that I could check whether or not my judgement was correct. The code for this final plot can be seen here, which is a simple call of the scipy step response function, passing in my newfound numerator and denominator:
+
+\begin{lstlisting}
+tout2, yout2 = sig.step((closednum, closedden))
+\end{lstlisting}
+
+Once I had plotted this, the lab was complete.
+
+\newpage
+\section{Results} 
+\textbf{Part 1}
+
+The following is the plot for the step response to my open loop transfer function:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{openstep.png}
+\end{figure}
+
+As you can see, the function shows a drastic exponential increase, which is not exactly stable. This supports my conclusion that the system would not be stable because of the positive, as the graph is not stable.
+
+\noindent \textbf{Part 2}
+
+The next figure includes my plot for the step response to the closed loop transfer function:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{closedstep.png}
+\end{figure}
+
+This plot shows a much more stable graph, as it is not increasing exponentially and starts to flatten out at the top. This is what I expected from looking at the transfer function, so the results do support my judgement of stability.
+
+\section{Questions}
+\begin{enumerate}
+    \item In Part 1 Task 5, why does convolving the factored terms using scipy.signal.convolve() result in the expanded form of the numerator and denominator? Would this work with your user-defined convolution function from Lab 3? Why or why not?
+    
+    This works because we are dealing with functions in the s domain. As we learned, convolving simply results in the multiplication of two Laplace transforms, which is what we are doing in this lab. This would not work with our user defined function though, since that was an exact mathematical definition of convolution based on the time domain.
+    
+    \item Discuss the difference between the open- and closed-loop systems from Part 1 and Part 2. How does stability differ for each case, and why?
+
+    
+    Open loop is the shortest path from input to output, whereas closed loop is the actual path from input to output. Our open loop was unstable, because there was no negative feedback to counteract it. Once we added in the negative feedback loop, our system was stable.
+    
+    \item What is the difference between scipy.signal.residue() used in Lab 6 and scipy.signal.tf2zpk() used in this lab?
+    
+    The residue function used in lab 6 did not show us the poles and zeroes, and was just used for partial fraction expansion.
+    
+    \item Is it possible for an open-loop system to be stable? What about for a closed-loop system to be unstable? Explain how or how not for each.
+    
+    It is possible, if there were no positive poles in our open loop to make it unstable. For closed loop, if there were positive poles then in the transfer function then it would be unstable.
+\end{enumerate}
+
+\section{Conclusion}
+
+This lab was very useful, as we learned new methods to evaluate complicated transfer functions. Aside from that, we also gained a new tool of being able to judge system stability based on their transfer functions. This lab was enjoyable because we were able to make predictions, and then check our predictions. This really shows how powerful Python is, but also that we need to be able to see and understand things before plotting them out. Being able to recognize stability based on transfer functions will always be very useful, as much of this class and our future relies on determining outputs.
+\newline https://github.com/knottcade
+
+
+%-------------------------------------------------------------------------------
+%REFERENCES
+%-------------------------------------------------------------------------------
+%\newpage 
+%\section{References}
+
+%\textit{Inserting Images. (n.d.). Retrieved from %https://www.overleaf.com/learn/latex/Inserting_Images}
+\end{document}
