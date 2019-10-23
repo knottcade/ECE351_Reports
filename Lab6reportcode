@@ -1,0 +1,265 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Modified (v 0.2) by jluo
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2019
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{\thepage}
+\fancyhead[R]{Knott}
+%\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+{\fontfamily{cmr}\selectfont
+\title{ \LARGE\textsc{ECE 351 Sect. 51 \\ Lab 6}
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{6}
+		\HRule{0.5pt} \\ [0.5cm]
+		\normalsize \today \vspace*{5\baselineskip}}
+		}
+
+\date{}
+
+\author{
+		Cade Knott\\}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%-------------------------------------------------------------------------------
+% Section title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{Introduction}
+The goal for this lab was to practice partial fraction expansion methods, specifically using the residue function built into scipy, \texttt{scipy.signal.residue()}. Partial fraction expansion includes working with a polynomial in the denominator of a fraction, that allows us to isolate the poles of our function by determining the correct coefficients for each part. This can become very complex depending on the polynomial in our denominator, so it will be very useful to be able to complete this operation through Python rather than by hand.
+
+\section{Equations}
+
+Transfer function from prelab:
+$$H(s) = \frac{Y(s)}{X(s)} = \frac{s^2 + 6s +12}{s^2 + 10s + 24} = \frac{s^2 + 6s + 12}{(s+6)(s+4)}$$
+
+Step Response from prelab:
+$$y(t) = (\frac{1}{2} + e^{-6t} - \frac{1}{2}e^{-4t})u(t)
+
+Given Equation for Part 2
+$$y^{(5)}(t) + 18y^{(4)}(t) + 218y^{(3)}(t) + 2036y^{(2)} + 9085y^{(1)}(t) + 25250y(t) = 25250x(t)$$
+
+\textbf{Part 1}
+
+The first part of the lab required us to plot the step response that we found in the prelab. I completed this by creating a user-defined function to model my step response exactly, by using \texttt{np.exp()} and passing it the values shown in my equation. The code for this first function can be seen here:
+
+\begin{lstlisting}
+def handsolv(t):
+        y = (0.5 + np.exp(-6*t) - (0.5*np.exp(-4*t)))*step(t, 0)
+        return y
+        
+y1 = handsolv(t)
+\end{lstlisting}
+
+As you can see, this user defined function looks very similar to my equation from the prelab. Next, I had to use the scipy function. This requires creating two matrices, one for the numerator of the transfer function, and one for the denominator. Once these matrices are defined based on the coefficients of the transfer function, I then called the function passing it the values I just defined and defining time for the function. The code for this function can be seen below:
+
+\begin{lstlisting}
+num = [1, 6, 12]
+den = [1, 10, 24]
+
+tout, yout = sig.step((num, den), T = t) 
+\end{lstlisting}
+
+Once these two functions were plotted, I had to use the \texttt{scipy.signal.residue()} function to complete partial fraction expansion for my transfer function, and print the results. These results can be found in Appendix 1 at the end of this report, and the code for this function can seen here:
+
+\begin{lstlisting}
+den2 = [1, 10, 24, 0]
+
+r, p, _ = sig.residue(num, den2)
+\end{lstlisting}
+
+Once this was complete, so was part one of the lab.
+
+\noindent\textbf{Part 2}
+
+The next part of the lab required me to compute the partial fraction expansion of the given differential equation by once again using the scipy residue function. The results can be found in Appendix 1, and the code for the function and array can be seen here:
+
+\begin{lstlisting}
+num3 = [25250]
+den3 = [1, 18, 218, 2036, 9085, 25250, 0]
+
+
+r2, p2, _ = sig.residue(num3, den3)
+\end{lstlisting}
+
+Once I had computed the partial fraction expansion, I then used my results to compute the step response using the cosine method. I implemented this by creating another user-defined function, which ran through the steps of the cosine method. First I had to initialize my output as an array of zeroes, and then I created a for loop to run throuh the cosine method. This included setting up four variables to represent alpha, omega, magnitude of k, and the angle of k. To calculate these, I set them equal to numpy functions to calculate what I wanted, the real and imaginary parts of p, as well as the absolute value and angle of r. The last line of this function writes out the definition of the cosine method setting it to the output. The code for this function can be seen here:
+
+\begin{lstlisting}
+def cosmethod(r2, p2, t2):
+    y = np.zeros((len(t2)))
+    for i in range(len(r2)):
+        a = np.real(p2[i])
+        w = np.imag(p2[i])
+        k0 = abs(r2[i])
+        k1 = np.angle(r2[i])
+        y = y + (k0*np.exp(a*t2)*np.cos(w*t2 + k1))*step(t2, 0)
+    return y
+    
+y2 = cosmethod(r2, p2, t2)
+\end{lstlisting}
+
+Finally, I once again used the scipy step response function to check my user defined function. The code for this can be seen here:
+
+\begin{lstlisting}
+den4 = [1, 18, 218, 2036, 9085, 25250]     
+
+tout2, yout2 = sig.step((num3, den4), T = t)
+\end{lstlisting}
+
+Once this part was complete, I was finished with the lab procedure.
+
+\newpage
+\section{Results} 
+\textbf{Part 1}
+
+The following is the plot of my first user defined function, showing my hand calculated step response:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{handsolv.png}
+\end{figure}
+
+This graph makes sense, as it spikes in the beginning where the step function is defined, and then decayse from there. I then plotted the sig.impulse() function to verify it looks the same as my first function. The plot for this can be seen here:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{stepresponse1.png}
+\end{figure}
+
+\noindent \textbf{Part 2}
+
+The next figure includes my plot for my user defined function to implement the cosine method:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{cosinemethod.png}
+\end{figure}
+
+This plot makes sense, as it jumps up in the beginning from the exp() part of the output, and then there is sinusoidal decay. I then plotted the transfer function given from my partial fraction expansion to verify my fucntion using the scipy response function which can be seen here:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{stepresponse2.png}
+\end{figure}
+ 
+ Once I verified that my plots matched, the lab was complete.
+
+\section{Error Analysis}
+
+Learning how to use arrays was a big part of this lab, as we have not had much practice with that before. We had to change up the denominator for our step functions, which was one trick to getting our functions to work properly. Once I figured out exactly how my arrays should look, the lab was pretty straightforward.
+
+\section{Questions}
+\begin{enumerate}
+    \item For a non-complex pole-residue term, you can still use the cosine method, explain why this works.
+    
+    If the imaginary part of the cosine method does not exist and is therefore equal to zero, then the cosine in our final equation will be a cosine of zero, which is equal to one. This leaves us with just the $|k|e^{-\alpha t}$, which if we look at our transform table is equal to $]frac{|k|}{s+\alpha}$ in the s domain. So, when the pole-residue term is non-complex, it turns into a normal Laplace transform.
+    
+    \item Leave any feedback on the clarity of the expectations, instructions, and deliverables.
+    
+    The expectations were very well defined for this lab, and it was easy to see what was expected of me.
+\end{enumerate}
+
+\section{Conclusion}
+
+This lab was very useful as partial fraction expansion can be a very rigorous process. As we saw in the given differential equation, some equations can be very difficult to do by hand. The skills learned in this lab will certainly be beneficial in the future, when we come across equations like these. I definitely look forward to using this to implement partial fraction expansion in the future rather than doing it by hand.
+\newline https://github.com/knottcade
+
+\newpage
+\appendix{Appendix 1}
+
+Part 1 Partial Fraction Expansion Results:
+r[ 1.  -0.5  0.5]
+p[-6. -4.  0.]
+
+Part 2 Partial Fraction Expansion Results:
+r2[ 1 +0.j -0.48557692 +0.72836538j -0.48557692-0.72836538j
+-0.21461963+0.j 0.09288674-0.04765193j 0.09288674+0.04765193j]
+p2[0+0.j  -3. +4.j  -3. -4.j -10. +0.j  -1.+10.j -1.-10.j]
+
+
+%-------------------------------------------------------------------------------
+%REFERENCES
+%-------------------------------------------------------------------------------
+%\newpage 
+%\section{References}
+
+%\textit{Inserting Images. (n.d.). Retrieved from %https://www.overleaf.com/learn/latex/Inserting_Images}
+\end{document}
