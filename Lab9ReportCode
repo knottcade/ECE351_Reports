@@ -1,0 +1,286 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Modified (v 0.2) by jluo
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2019
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{\thepage}
+\fancyhead[R]{Knott}
+%\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+\fontfamily{cmr}\selectfont
+\title{ \LARGE\textsc{ECE 351 Sect. 51 \\ Lab 9}
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{9}
+		\HRule{0.5pt} \\ [0.5cm]
+		\normalsize \today \vspace*{5\baselineskip}}
+		}
+
+\date{}
+
+\author{
+		Cade Knott\\}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%-------------------------------------------------------------------------------
+% Section title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{Introduction}
+The goal for this lab was to practice using fast fourier transforms, by creating functions in Python to implement the process. We have already acquainted ourselves with the standard method of performing fourier transforms, but fast fourier transforms are equally as powerful and require less calculations. Using these transforms and the code we develop in lab, we will have a very efficient tool for computing fourier transforms, and hopefully have a better understanding of the process itself.
+
+\section{Equations}
+
+Equations from Lab Handout:
+
+$$(1) = x(t) = cos(2\pi t)$$
+$$(2) = x(t) = 5sin(2\pi t)$$
+$$(3) = x(t) = 2cos((4\pi t) − 2) + sin^2((12π\pi t) + 3)$$
+
+\section{Methodology}
+
+To begin this lab, we were given code that functions as a fast fourier transform calculator. I first created a function that used the code exactly, without adding any extra instructions. The code looks like this:
+
+\begin{lstlisting}
+def fftold(x, fs):
+    N = len(x) #find the length of the signal
+    X_fft = fft(x) #perform the fft 
+    X_fft_shifted = fftshift(X_fft) #shift the zero frequency components
+                                    # to the center of the spectrum
+    freq = np.arange(-N/2, N/2)*fs/N #compute the frequencies for the 
+                                    output
+                                     #signal, (fs is the sampling frequency 
+                                     and
+                                     # needs to be defined previously in 
+                                     your code)
+    X_mag = np.abs(X_fft_shifted)/N  #compute the magnitudes of the signal
+    X_phi = np.angle(X_fft_shifted)  #compute the phases of the signal
+    return freq, X_mag, X_phi
+\end{lstlisting}
+
+As can be seen, this function follows the given code exactly. It takes in two arguments, one being the input signal, and the other being the frequency. It then outputs three different arrays of values, one for the magnitudes of the signal, one for the angle, and one for the frequency so that we can plot the first two against frequency.
+
+The plotting requirements for this lab were somewhat strict, so I ended up creating a function for my plotting rather than writing the same plotting code over and over. The code for my plotting function can be seen here:
+
+\begin{lstlisting}
+def figplot(t, xt, freq, X_mag, X_phi):
+    myFigSize = (14,10)
+    plt.figure(figsize=myFigSize)
+    plt.subplot(3,1,1)
+    plt.subplots_adjust(left=0.125,bottom=0.1,right=0.9,top=0.9,wspace=0.2,hspace=0.3)
+    plt.plot(t,xt)
+    plt.grid(True)
+    plt.xlabel('t(s)')
+    plt.ylabel('x(t)')
+    plt.title('x(t)')
+
+    plt.subplot(3,2,3)
+    plt.stem(freq, X_mag)
+    plt.axis([-50,50,-0.5,0.5])
+    plt.grid(True)
+    plt.ylabel('|X(f)|')
+
+    plt.subplot(3,2,4)
+    plt.stem(freq, X_mag)
+    plt.axis([-2,2,-0.5,0.5])
+    plt.grid(True)
+    
+    plt.subplot(3,2,5)
+    plt.stem(freq, X_phi)
+    plt.axis([-50,50,-3,3])
+    plt.grid(True)
+    plt.xlabel('f(Hz)')
+    plt.ylabel('/_X(f)')
+
+    plt.subplot(3,2,6)
+    plt.stem(freq, X_phi)
+    plt.axis([-2,2,-3,3])
+    plt.grid(True)
+    plt.xlabel('f(Hz)')
+    plt.show()
+\end{lstlisting}
+
+As can be seen, this function takes in five arguments; time and the input signal, frequency, and the magnitude and angle of the signal. From here, my function creates a figure with 5 subplots, one for the original signal against time up top, then magnitude versus frequency in the second row, and angle versus frequency in the last row. The second plot for angle and magnitude is supposed to show a zoomed in version of the plot, which I achieved by manipulating the axes settings for these plots. Now that my plotting function was created as well as my fft function, I was ready to start plotting the given signals from the handout. 
+
+I began this by creating variables to represent the given signals, and then passed these signals into my fft function, returning the frequency, magnitude, and angle into designated variables. From here, I was able to use my plot function to create figures for each signal, passing in the signal, and my found frequency, magnitude, and angle from the fft function. The plots can be found in the results section.
+
+Once I had my first three plots created, it was easy to see that there was too much noise in my angle plot, making the result unreadable. To correct this issue, I modified the given fft function to eliminate the angle values that did not correspond with the frequencies where my signal had magnitude. The code for this modified function can be seen below:
+
+\begin{lstlisting}
+def fftnew(x, fs):
+    N = len(x) #find the length of the signal
+    X_fft = fft(x) #perform the fft 
+    X_fft_shifted = fftshift(X_fft) #shift the zero frequency components
+                                                  # to the center of the spectrum
+    freq = np.arange(-N/2, N/2)*fs/N  #compute the frequencies for the output
+                                      #signal, (fs is the sampling frequency and
+                                      # needs to be defined previously in your code)
+    X_mag = np.abs(X_fft_shifted)/N  #compute the magnitudes of the signal
+    X_phi = np.angle(X_fft_shifted)  #compute the phases of the signal
+    for i in range(len(X_phi)):
+        if np.abs(X_mag[i])<1e-10:
+            X_phi[i] = 0
+    return freq, X_mag, X_phi
+\end{lstlisting}
+
+As can be seen, the only change I made to my old function was the inclusion of a for loop that sets the angle to zero when the magnitude drops below an unreadable point. This way, rather than viewing many random phase points, we only see the important ones where our magnitude is defined. Using this new function, I recalculated my magnitude and angles for the three signals, and used my plot function to create new figures for my new results. 
+
+The last step for this lab was to run my square wave approximation from Lab 8 through my new fft function. I reused the code from last lab to create this series approximation, and then followed the same steps as the other signals to plot my findings. All of these figures can be seen in the results section.
+
+\section{Results} 
+\textbf{Part 1}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task11.png}
+    \caption{Unclean $x(t) = cos(2\pi t)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task12.png}
+    \caption{Clean $x(t) = cos(2\pi t)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task21.png}
+    \caption{Unclean $x(t) = 5sin(2\pi t)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task22.png}
+    \caption{Clean $x(t) = 5sin(2\pi t)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task31.png}
+    \caption{Unclean $x(t) = 2cos((4\pi t) − 2) + sin^2((12π\pi t) + 3)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{task32.png}
+    \caption{Clean $x(t) = 2cos((4\pi t) − 2) + sin^2((12π\pi t) + 3)$}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{squarewave.png}
+    \caption{Lab 8 Square Wave}
+\end{figure}
+
+As can be seen, these plots all follow the same format designated by my plot function. If you focus on the phase plots, you can see the difference from the old and new fft functions, as the phase plot is cleaned up drastically. Aside from this, each figure displays the signal, the magnitude, the angle, and zoomed in versions for the latter two. Once all these plots were complete, so was the lab. 
+
+\section{Questions}
+\begin{enumerate}
+    \item What happens if fs is lower? If it is higher? fs in your report must span a few orders of magnitude.
+    
+    Fs directly affects our step size when plotting, as $T_s = 1/fs$. So, if we increase this frequency, then our step size will be smaller, and we will collect more data points. This also means our code takes more time to run, but we will be less likely to miss any important data points. On the contrary, if we decrease fs, then it is likely we will miss data points where the magnitude is defined, as our function will skip over those points if they are between steps. So, if fs is lower our resolution decreases, and if it is higher our resolution increases.
+    
+    \item What difference does eliminating the small phase magnitudes make?
+    
+    Eliminating the small phase magnitudes makes our phase plots actually read-able. Rather than having a phase at every point, we can then view only the important phases that are defined when the magnitude is defined. This makes our phase plots more clear and concise. 
+    
+    \item Verify your results from Tasks 1 and 2 using the Fourier transforms of cosine and sine. Explain why your results are correct. You will need the transforms in terms of Hz, not rad/s. For example, the Fourier transform of cosine (in Hz) is: $F{cos (2\pi f_0t)} = \frac{1}{2}[\delta (f − f_0) + \delta(f + f_0)]$
+
+    Looking at the magnitude graph for the cosine function, it is easy to identify these two delta functions from the fourier transform. However, using these rules the sine magnitude graph should show a positive spike as well as a negative one, but both are positive just like the cosine function. I am not confident that I am understanding the question correctly, so perhaps the transform supports my results, but from what I can tell I do not think it does. 
+    
+    \item Leave any feedback on the clarity of lab tasks, expectations, and deliverable.
+    
+    The last report question was a little difficult for me to understand, and I probably did not understand it correctly. I am not sure how to verify my results using the transforms, so a little further instruction would be helpful. Other than this the handout was very clear and the expectations were defined well.
+    
+\end{enumerate}
+
+\section{Conclusion}
+
+This lab was very useful, as we learned a new method of applying fourier transforms. The fast fourier transforms allow us to get a good idea of how a signal behaves with little work or time required, which is useful when we have a lot of signals to analyze or complicated signals. We already know that fourier transforms are very useful, so the more ways we can use apply them the better. I look forward to using this method of performing fourier transforms in future labs, and in future classes.
+
+\newline https://github.com/knottcade
+%-------------------------------------------------------------------------------
+%REFERENCES
+%-------------------------------------------------------------------------------
+%\newpage 
+%\section{References}
+
+%\textit{Inserting Images. (n.d.). Retrieved from %https://www.overleaf.com/learn/latex/Inserting_Images}
+\end{document}
