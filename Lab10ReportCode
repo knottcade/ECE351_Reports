@@ -1,0 +1,247 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Modified (v 0.2) by jluo
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2019
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{float}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{\thepage}
+\fancyhead[R]{Knott}
+%\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+\fontfamily{cmr}\selectfont
+\title{ \LARGE\textsc{ECE 351 Sect. 51 \\ Lab Ten}
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{10}
+		\HRule{0.5pt} \\ [0.5cm]
+		\normalsize \today \vspace*{5\baselineskip}}
+		}
+
+\date{}
+
+\author{
+		Cade Knott\\}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%-------------------------------------------------------------------------------
+% Section title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{Introduction}
+The goal for this lab was to gain practice creating and using bode plots in python, along with other with other frequency response tools. As we have seen in class, bode plots are a very useful way to quickly understand how a signal is going to affect another signal if they are combined. However, creating these plots can be just as much work as our normal methods, so understanding how to generate these plots using python can expedite the process of our work. Bode plots are super useful, and after this lab we will have a quick and efficient method of creating them. 
+
+\section{Equations}
+
+Magnitude and Frequency Equations from Prelab:
+
+$$|H(j\omega)| =  \frac{\frac{\omega}{RC}}{\sqrt{\omega^4 + [(\frac{1}{RC})^2 - (\frac{2}{LC})]\omega^2 + (\frac{1}{LC})^2}}$$
+$$\angle H(j\omega) = \frac{\pi}{2} - tan^{-1}\left(\frac{\frac{\omega}{RC}}{-\omega^2 + \frac{1}{LC}}\right)$$
+
+Equation from Part 2 of Lab Handout:
+
+$$x(t) = cos(200\pi t) + cos(6048\pi t) + sin(1E5\pi t)$$
+
+\section{Methodology}
+
+\textbf{Part 1}
+
+I began this lab by plotting the phase and magnitude expressions I had found in the prelab. Rather than using the usual plot function we have been using for the majority of this semester, I used \texttt{plt.semilogx()}. This way, my plot would be represented on a logarithmic scale since we are plotting against frequency rather than time. The code for magnitude, phase, and plotting of the two against frequency can be seen here:
+
+\begin{lstlisting}
+fs = 1e6
+steps1 = 1/fs
+w = np.arange(1e3, 1e6+steps, steps)
+
+x_mag = (w/(R*C))/(np.sqrt((w**4) + ((1/(R*C))**2 - (2/(L*C)))*(w**2) + (1/(L*C))**2))
+x_phi = (np.pi/2) - np.arctan((w/(R*C))/((-(w**2)) + (1/(L*C))))
+
+plt.semilogx(w, 20*np.log10(x_mag))
+
+plt.semilogx(w, (180/np.pi)*x_phi)
+\end{lstlisting}
+
+As can be seen, the expressions for magnitude and angle follow exactly as I found in the prelab. Once those were defined, I had to make sure when plotting to account for the log scale by plotting 20 times the log of the magnitude. I also had to convert the phase from radians to degrees, by multiplying by 180 over pi. 
+
+The next step for this lab was to repeat the bode plot using the built in scipy function, scipy.bode. The code for this step can be seen here:
+
+\begin{lstlisting}
+num = [(1/(R*C)), 0]
+den = [1, (1/(R*C)), (1/(L*C))]
+
+angfreq, x_mag1, x_phi1 = sig.bode((num, den),w)
+\end{lstlisting}
+
+For this function I created three new variables to represent the frequency, angle, and magnitude given by the bode function. I also had to create a numerator and denominator array for my transfer function to pass into the function, along with the frequency that I had already defined. From here I plotted the results, with magnitude and phase against the given angular frequency, which also meant that I had to shift the phase by pi. Once I verified that these first two plots were identical, I moved onto the next task.
+
+The last step for this part of the lab required me to again repeat the bode plot, but this time plotting against frequency in hertz rather than radians/s. To implement this I used the control package, which has a transfer function function, as well as a bode plot function. Following the example code given in the lab handout, I developed this code:
+
+\begin{lstlisting}
+sys = con.TransferFunction(num, den)
+_ = con.bode(sys, w, dB = True, Hz = True, deg = True, Plot = True) 
+\end{lstlisting}
+
+As you can see, I first set a new variable equal to the output of the \texttt{con.TransferFunction()}, passing in the numerator and denominator of my original transfer function. Then, I passed this output into the bode function, which automatically created the bode plot for me, with frequency in hertz. I made sure that the shape of this plot matched my other bode plots, and moved on to the next part of the lab.
+
+\textbf{Part 2}
+
+The next part of the lab first required me to plot a signal given in the handout. The code for this can be seen here:
+
+\begin{lstlisting}
+t = np.arange(0, 1e-2+steps1, steps1)
+
+x = np.cos(200*np.pi*t) + np.cos(6048*np.pi*t) + np.sin(1e5*np.pi*t)
+\end{lstlisting}
+
+As you can see, the the equation simply follows what was given in the lab handout. From here, I plotted x against t, using the regular plot function we have always used.
+
+From here, I passed the signal through my RLC circuit to see the output. I completed this by first converting my original transfer function to its z-domain function, and then used the sig.lfilter function to compute the output for me to plot. The code for this can be seen here:
+
+\begin{lstlisting}
+num1, den1 = sig.bilinear(num, den, fs)
+y = sig.lfilter(num1, den1, x)
+\end{lstlisting}
+
+I first used the sig.bilinear() function to convert my tranfer function to the z-domain, passing in my original numerator and denominator along with the frequency I defined. After this I passed my new numerator and denominator into the sig.lfilter function, along with my signal x. From here, I plotted y against t to see the output of passing the signal through the filter. Once this was complete, so was the lab.
+
+\newpage
+\section{Results} 
+\textbf{Part 1}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{p1t1.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{p1t2.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{p1t3.png}
+\end{figure}
+
+As you can see, these three figures reveal the same bode plot. The first two show the bode with frequency in radians/s, while the last one is in hertz. The shape is the same for all three however, which ensures me that my results are accurate, and this is in fact the correct bode plot for the given RLC circuit and transfer function.
+
+\textbf{Part 2}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{p2t1.png}
+\end{figure}
+
+This figure shows the signal x(t), which shows three different frequencies that the signal is oscillating at. One low frequency makes up the main curve of the plot, and two higher frequencies are shown in the spikes of the graph and the way the spikes are filled (the highest frequency). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=13cm]{p2t4.png}
+\end{figure}
+
+This final plot shows the response of the signal to the system, which is a very high frequency signal. This is to be expected since the signal we passed in had such high frequencies in it. With this plot complete the lab was as well.
+
+\section{Questions}
+\begin{enumerate}
+    \item Explain how the filter and filtered output in Part 2 makes sense given the Bode plots from Part 1. Discuss how the filter modifies specific frequency bands, in Hz.
+    
+    The filtered output makes sense, since our filter will affect the output at the frequencies contained in the input signal. In this case, we were dealing mostly with high frequencies, where the magnitude was very low. With this in mind, the higher frequency parts of the input signal have a much lesser effect on the output, and we see more of the first cosine term of our input signal, since it occurs at a lower frequency. 
+    
+    \item Discuss the purpose and workings of scipy.signal.bilinear() and scipy.signal.lfilter().
+    
+    The sig.bilinear function is responsible for converting our transfer function to the z-domain, by taking in the numerator and denominator of the transfer function, as well as the frequency. The lfilter function is what is responsible for actually computing the filtered output, by manipulating the given signal according to the transfer function of the filter. This way it knows which frequencies to look for from the input signal, and the magnitude and phase angle values that correspond to those frequencies.
+    
+    \item What happens if you use a different sampling frequency in scipy.signal.bilinear() than you used for the time-domain signal?
+    
+    If you change the sampling frequency, then the results are no longer accurate. The plot is changed drastically, and the results no longer make sense.
+    
+\end{enumerate}
+
+\section{Conclusion}
+
+Overall this lab was very useful, as I now know how to create my own bode plots from transfer functions. Bode plots are a very useful tool to have, and for me they are many times easier to read and understand than other methods of filtering signals. Being able to quickly generate these plots will make my future calculations far more efficient, and could help with clearing up confusion on certain problems. I am certain that I will use this method of creating bode plots, as well as filtering signals extensively in my future.
+
+https://github.com/knottcade
+%-------------------------------------------------------------------------------
+%REFERENCES
+%-------------------------------------------------------------------------------
+%\newpage 
+%\section{References}
+
+%\textit{Inserting Images. (n.d.). Retrieved from %https://www.overleaf.com/learn/latex/Inserting_Images}
+\end{document}
